@@ -1,16 +1,19 @@
-const router = require('express').Router();
+const router = require("express").Router();
 const {
   createEmployee,
   getEmployees,
   updateEmployee,
-  deleteEmployee
-} = require('../controllers/user.controller'); // or use employee.controller.js if you've separated it
-const { protect } = require('../middleware/auth');
+  deleteEmployee,
+} = require("../controllers/employee.controller");
 
-// Protected Routes for Employee CRUD
-router.post('/employee', protect, createEmployee);           // Create
-router.get('/employee', protect, getEmployees);              // Read All for Logged In Admin
-router.put('/employee/:id', protect, updateEmployee);        // Update
-router.delete('/employee/:id', protect, deleteEmployee);     // Delete
+const { protect } = require("../middleware/auth");
+
+// All routes here are protected (require authentication)
+router.use(protect);
+
+router.post("/employee", createEmployee); // Create employee
+router.get("/employee", getEmployees); // Get all employees
+router.put("/employee/:id", updateEmployee); // Update employee
+router.delete("/employee/:id", deleteEmployee); // Delete employee
 
 module.exports = router;
