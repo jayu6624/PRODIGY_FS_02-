@@ -6,6 +6,7 @@ const asyncHandler = require("express-async-handler");
 // @access  Private
 const createEmployee = asyncHandler(async (req, res) => {
   const {
+    employeeID,
     firstName,
     lastName,
     email,
@@ -16,6 +17,7 @@ const createEmployee = asyncHandler(async (req, res) => {
   } = req.body;
 
   const employee = await Employee.create({
+    employeeID,
     firstName,
     lastName,
     email,
@@ -68,6 +70,7 @@ const updateEmployee = asyncHandler(async (req, res) => {
 // @access  Private
 const deleteEmployee = asyncHandler(async (req, res) => {
   const employee = await Employee.findById(req.params.id);
+  console.log(employee);
 
   if (!employee) {
     res.status(404);
@@ -84,9 +87,30 @@ const deleteEmployee = asyncHandler(async (req, res) => {
   res.json({ message: "Employee removed" });
 });
 
+// @desc    Get employee by ID
+// @route   GET /api/employee/:id
+// @access  Private
+const getEmployeeById = asyncHandler(async (req, res) => {
+  const employee = await Employee.findById(req.params.id);
+
+  if (!employee) {
+    res.status(404);
+    throw new Error("Employee not found");
+  }
+
+  // Make sure user owns employee
+  if (employee.createdBy.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error("Not authorized to access this employee");
+  }
+
+  res.json(employee);
+});
+
 module.exports = {
   createEmployee,
   getEmployees,
+  getEmployeeById,
   updateEmployee,
   deleteEmployee,
 };

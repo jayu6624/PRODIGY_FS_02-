@@ -47,10 +47,9 @@ export const authService = {
     const response = await api.post("/user/register", userData);
     if (response.data.token) {
       const userData = {
-        ...response.data.user,
         token: response.data.token,
       };
-      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("user", JSON.stringify(userData.token));
     }
     return response.data;
   },
@@ -59,10 +58,10 @@ export const authService = {
     const response = await api.post("/user/login", { email, password });
     if (response.data.token) {
       const userData = {
-        ...response.data.user,
+        
         token: response.data.token,
       };
-      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("user", JSON.stringify(userData.token));
     }
     return response.data;
   },

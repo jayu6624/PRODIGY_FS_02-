@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import employeeApi from "../services/employee";
-import { useNavigate } from "react-router-dom";
 
-function CreateEmployee() {
+function EditEmployee() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [formData, setFormData] = useState({
     employeeID: "",
     firstName: "",
@@ -16,6 +17,29 @@ function CreateEmployee() {
     salary: "",
   });
 
+  useEffect(() => {
+    const fetchEmployee = async () => {
+      try {
+        const employee = await employeeApi.getEmployeeById(id);
+        setFormData({
+          employeeID: employee.employeeID,
+          firstName: employee.firstName,
+          lastName: employee.lastName,
+          email: employee.email,
+          position: employee.position,
+          department: employee.department,
+          startDate: employee.startDate.split("T")[0], // Format date for input
+          salary: employee.salary,
+        });
+      } catch (error) {
+        toast.error("Failed to fetch employee details");
+        navigate("/home/list");
+      }
+    };
+
+    fetchEmployee();
+  }, [id, navigate]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -23,50 +47,20 @@ function CreateEmployee() {
       [name]: value,
     }));
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Get JWT token from localStorage
-    // Get user data from localStorage and parse it
-    const userData = JSON.parse(localStorage.getItem("user"));
-    const token = userData?.token;
-
-    console.log(userData);
-    
-    if (!token) {
-      toast.error("Please login to create an employee");
-      navigate("/");
-      return;
-    }
-    console.log(token);
-
     try {
-      // Create headers with Bearer token
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
-      // Pass headers in the API call
-      await employeeApi.createEmployee(formData, headers);
-      toast.success("Employee created successfully!");
-      setFormData({
-        employeeID: "",
-        firstName: "",
-        lastName: "",
-        email: "",
-        position: "",
-        department: "",
-        startDate: "",
-        salary: "",
-      });
+      await employeeApi.updateEmployee(id, formData);
+      toast.success("Employee updated successfully!");
       navigate("/home/list");
     } catch (error) {
       if (error.response?.status === 401) {
         toast.error("Session expired. Please login again");
-        localStorage.removeItem("token");
         navigate("/login");
       } else {
-        toast.error(error.message || "Failed to create employee");
+        toast.error(error.message || "Failed to update employee");
       }
     }
   };
@@ -75,11 +69,9 @@ function CreateEmployee() {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-          Create New Employee
+          Edit Employee
         </h2>
-        <p className="text-gray-400 mt-2">
-          Add a new employee to your organization
-        </p>
+        <p className="text-gray-400 mt-2">Update employee information</p>
       </div>
 
       <form
@@ -95,7 +87,6 @@ function CreateEmployee() {
             name="employeeID"
             value={formData.employeeID}
             onChange={handleChange}
-            placeholder="EMP001"
             className="w-full px-4 py-2 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none transition text-white"
             required
           />
@@ -197,12 +188,19 @@ function CreateEmployee() {
           />
         </div>
 
-        <div className="md:col-span-2 flex justify-end">
+        <div className="md:col-span-2 flex justify-end space-x-4">
+          <button
+            type="button"
+            onClick={() => navigate("/home/list")}
+            className="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition duration-300"
+          >
+            Cancel
+          </button>
           <button
             type="submit"
-            className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg font-semibold hover:from-cyan-600 hover:to-blue-600 transition duration-300 transform hover:scale-105 active:scale-95 shadow-lg"
+            className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg font-semibold hover:from-cyan-600 hover:to-blue-600 transition duration-300"
           >
-            Create Employee
+            Update Employee
           </button>
         </div>
       </form>
@@ -210,4 +208,4 @@ function CreateEmployee() {
   );
 }
 
-export default CreateEmployee;
+export default EditEmployee;

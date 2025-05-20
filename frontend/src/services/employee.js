@@ -17,6 +17,14 @@ const employeeApi = {
       throw error.response?.data || error.message;
     }
   },
+  getEmployeeById: async (id) => {
+    try {
+      const response = await api.get(`/employee/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
   updateEmployee: async (id, employeeData) => {
     try {
       const response = await api.put(`/employee/${id}`, employeeData);

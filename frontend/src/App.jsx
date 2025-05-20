@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import CreateEmployee from "./pages/CreateEmployee.jsx";
 import EmployeeList from "./pages/EmployeeList";
 import { AuthProvider } from "./context/AuthContext";
+import EditEmployee from "./pages/EditEmployee";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
             {/* Nested routes inside Home */}
             <Route path="create" element={<CreateEmployee />} />
             <Route path="list" element={<EmployeeList />} />
+            <Route path="edit/:id" element={<EditEmployee />} />
           </Route>
         </Routes>
 

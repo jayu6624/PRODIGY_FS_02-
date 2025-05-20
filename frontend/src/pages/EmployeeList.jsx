@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import employeeApi from "../services/employee";
 
 function EmployeeList() {
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState([
     {
       id: 1,
@@ -19,9 +21,9 @@ function EmployeeList() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("");
-
   const filteredEmployees = employees.filter((employee) => {
     const matchesSearch =
+      employee.employeeID?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -44,11 +46,10 @@ function EmployeeList() {
   useEffect(() => {
     fetchEmployees();
   }, []);
-
-  const handleDelete = async (id) => {
+  const handleDelete = async (employeeId) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        await employeeApi.deleteEmployee(id);
+        await employeeApi.deleteEmployee(employeeId);
         toast.success("Employee deleted successfully");
         fetchEmployees(); // Refresh the list
       } catch (error) {
@@ -96,8 +97,12 @@ function EmployeeList() {
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
+          {" "}
           <thead>
             <tr className="bg-gray-800/50">
+              <th className="p-4 text-left text-gray-300 font-semibold border-b border-gray-700">
+                Employee ID
+              </th>
               <th className="p-4 text-left text-gray-300 font-semibold border-b border-gray-700">
                 Name
               </th>
@@ -118,9 +123,14 @@ function EmployeeList() {
           <tbody>
             {filteredEmployees.map((employee) => (
               <tr
-                key={employee.id}
+                key={employee._id}
                 className="hover:bg-gray-800/30 transition-colors"
               >
+                <td className="p-4 border-b border-gray-700">
+                  <span className="font-mono text-cyan-400">
+                    {employee.employeeID}
+                  </span>
+                </td>
                 <td className="p-4 border-b border-gray-700">
                   <div>
                     <div className="font-medium text-white">{`${employee.firstName} ${employee.lastName}`}</div>
@@ -142,17 +152,16 @@ function EmployeeList() {
                 </td>
                 <td className="p-4 border-b border-gray-700">
                   <div className="flex gap-2">
+                    {" "}
                     <button
                       className="px-3 py-1 text-sm bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg transition"
-                      onClick={() =>
-                        toast.info("Edit functionality coming soon!")
-                      }
+                      onClick={() => navigate(`/home/edit/${employee._id}`)}
                     >
                       Edit
                     </button>
                     <button
                       className="px-3 py-1 text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition"
-                      onClick={() => handleDelete(employee.id)}
+                      onClick={() => handleDelete(employee._id)}
                     >
                       Delete
                     </button>
